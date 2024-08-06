@@ -6,7 +6,7 @@ export const Logo = ({ className }: { className?: string }) => (
   <Link href={"/home"}>
     <Image
       src="/logo.svg"
-      alt="Simply Drive"
+      alt="Logo"
       width={300}
       height={300}
       className={cn(

@@ -10,35 +10,32 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   Link,
-  Divider,
   Avatar,
   AvatarIcon,
 } from "@nextui-org/react";
 import { Logo } from "./logo";
-import { ThemeSwitcher } from "../theme-switcher";
 
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Button,
 } from "@nextui-org/react";
 import { MoonIcon, SettingsIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut } from "@/lib/functions/auth/sign-out";
 
-export default function LayoutNavbar() {
+export default function LayoutNavbar({
+  isUserLoggedIn,
+  menuItems,
+  dropdownItems,
+}: {
+  isUserLoggedIn: boolean;
+  menuItems: { name: string; href: string }[];
+  dropdownItems: { name: string; icon: React.ReactNode; action: () => void }[];
+}) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
-
-  const menuItems = [
-    { name: "Αρχική", href: "/home" },
-    { name: "Αγαπημένα", href: "/liked" },
-    { name: "Πρόοδος", href: "/progress" },
-    { name: "Λάθη", href: "/mistakes" },
-    { name: "Εκθεσιακή", href: "/" },
-  ];
 
   return (
     <Navbar
@@ -80,41 +77,25 @@ export default function LayoutNavbar() {
               />
             </DropdownTrigger>
             <DropdownMenu aria-label="User Menu Actions">
-              <DropdownItem
-                key="light"
-                startContent={
-                  <SunIcon className="text-lg text-default-500 pointer-events-none flex-shrink-0 size-4" />
-                }
-                onClick={() => setTheme("light")}
-              >
-                Φωτεινή Λειτουργία
-              </DropdownItem>
-              <DropdownItem
-                key="dark"
-                startContent={
-                  <MoonIcon className="text-lg text-default-500 pointer-events-none flex-shrink-0 size-4" />
-                }
-                onClick={() => setTheme("dark")}
-              >
-                Σκοτεινή Λειτουργία
-              </DropdownItem>
-              <DropdownItem
-                href="/settings"
-                key="settings"
-                startContent={
-                  <SettingsIcon className="text-lg text-default-500 pointer-events-none flex-shrink-0 size-4" />
-                }
-              >
-                Ρυθμίσεις
-              </DropdownItem>
-              <DropdownItem
-                key="delete"
-                className="text-danger"
-                color="danger"
-                onClick={() => signOut()}
-              >
-                Αποσύνδεση
-              </DropdownItem>
+              {dropdownItems.map((item) => (
+                <DropdownItem
+                  key={item.name}
+                  startContent={item.icon}
+                  onClick={item.action}
+                >
+                  {item.name}
+                </DropdownItem>
+              ))}
+              {isUserLoggedIn && (
+                <DropdownItem
+                  key="logout"
+                  className="text-danger"
+                  color="danger"
+                  onClick={() => signOut()}
+                >
+                  Logout
+                </DropdownItem>
+              )}
             </DropdownMenu>
           </Dropdown>
         </NavbarItem>
