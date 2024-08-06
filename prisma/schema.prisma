@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(cuid())
+  username       String           @unique
+  password_hash  String
+  sessions       Session[]
+  UserQuizAnswer UserQuizAnswer[]
+  FavoriteQuiz   FavoriteQuiz[]
+  createdAt      DateTime         @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model QuizGroup {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  image     String
+  createdAt DateTime @default(now())
+  quizzes   Quiz[]
+}
+
+model Quiz {
+  id              Int              @id @default(autoincrement())
+  question        String
+  quizGroupId     Int
+  groupIndex      Int
+  image           String?
+  quizGroup       QuizGroup        @relation(fields: [quizGroupId], references: [id], onDelete: Cascade)
+  answers         Answer[]
+  userQuizAnswers UserQuizAnswer[]
+  favoriteQuizzes FavoriteQuiz[]
+  aiNotes         AiNote[]
+}
+
+model Answer {
+  id              Int              @id @default(autoincrement())
+  text            String
+  questionId      Int
+  isCorrect       Boolean
+  question        Quiz             @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userQuizAnswers UserQuizAnswer[]
+}
+
+model UserQuizAnswer {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  quizId    Int
+  answerId  Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  answer    Answer   @relation(fields: [answerId], references: [id])
+
+  // @@unique([userId, quizId, answerId])
+}
+
+model FavoriteQuiz {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  quizId    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+
+  @@unique([userId, quizId])
+}
+
+model AiNote {
+  id        Int      @id @default(autoincrement())
+  quizId    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+}
